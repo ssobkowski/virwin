@@ -199,7 +199,7 @@ function createObjects(): THREE.Group {
       roughness: 0.2,
     }),
   );
-  torusKnot.position.set(0.6, 1.2, -2.2);
+  torusKnot.position.set(0.6, 1.2, -10.2);
   torusKnot.rotation.set(0.9, 0.4, 1.1);
   group.add(torusKnot);
 
