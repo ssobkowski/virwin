@@ -1,0 +1,81 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "extends": ["ultracite/core"],
+  "files": {
+    "includes": ["**/src/**/*.ts", "**/src/**/*.tsx", "!src/types/db.d.ts"]
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useBlockStatements": "off",
+        "noParameterAssign": "off",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
+        "noNestedTernary": "off",
+        "noMagicNumbers": "off",
+        "useNumericSeparators": "off",
+        "useNamingConvention": "off",
+        "useCollapsedElseIf": "off",
+        "useConsistentTypeDefinitions": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off",
+        "useSimplifiedLogicExpression": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "info",
+        "noSwitchDeclarations": "off"
+      },
+      "suspicious": {
+        "noConsole": "off",
+        "noBitwiseOperators": "off"
+      },
+      "nursery": {
+        "useMaxParams": "off"
+      },
+      "performance": {
+        "noNamespaceImport": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "lineEnding": "lf",
+      "quoteStyle": "double",
+      "trailingCommas": "all",
+      "operatorLinebreak": "before"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "useSortedKeys": "off",
+        "useSortedAttributes": "off",
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":BUN:", ":NODE:"],
+              ":BLANK_LINE:",
+              ["@assets/**"],
+              ":BLANK_LINE:",
+              ["**/*", "!@/**", "!./**/*"],
+              ":BLANK_LINE:",
+              "@/**",
+              ":BLANK_LINE:",
+              ["./**/*", "../**/*"]
+            ]
+          }
+        }
+      }
+    }
+  }
+}
