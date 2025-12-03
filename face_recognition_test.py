@@ -17,7 +17,6 @@ CAM_OFFSET = (0, 0)  # cm
 Z_COEFF = 17000
 XY_COEFF = 1
 
-# Global state to share between CV loop and Websocket server
 latest_coords = {"x": 0, "y": 0, "z": 0}
 
 
@@ -25,9 +24,7 @@ async def websocket_handler(websocket):
     print("Client connected")
     try:
         while True:
-            # Send the latest coordinates to the client
             await websocket.send(json.dumps(latest_coords))
-            # Limit update rate to ~60 FPS to avoid flooding
             await asyncio.sleep(0.016)
     except websockets.ConnectionClosed:
         print("Client disconnected")
@@ -37,7 +34,7 @@ def start_server():
     async def main():
         print("Starting WebSocket server on ws://localhost:8765")
         async with websockets.serve(websocket_handler, "localhost", 8765):
-            await asyncio.Future()  # run forever
+            await asyncio.Future()
 
     asyncio.run(main())
 
@@ -86,7 +83,6 @@ def process_detection(result, frame, timestamp_ms):
         if result.detections:
             x, y, z = calc_coordinates(result, (frame.shape[1], frame.shape[0]))
 
-            # Update global state for WebSocket
             latest_coords = {"x": x, "y": y, "z": z}
 
             cv2.putText(
@@ -105,7 +101,6 @@ def process_detection(result, frame, timestamp_ms):
         print(f"Error in detection: {e}")
 
 
-# Start WebSocket server in a separate thread
 server_thread = threading.Thread(target=start_server, daemon=True)
 server_thread.start()
 
@@ -120,7 +115,7 @@ print("Detektor utworzony!")
 
 print("Otwieranie kamery...")
 # Użyj CAP_DSHOW na Windows dla lepszej wydajności
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
     print("BŁĄD: Nie można otworzyć kamery!")
