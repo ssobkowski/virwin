@@ -1,5 +1,11 @@
 import * as THREE from "three/webgpu";
 
+export type Scene = "shapes" | "targets" | "deep-targets";
+
+function unitmul(s: number) {
+  return (x: number) => x * s;
+}
+
 function createRoom(width: number, height: number): THREE.Group {
   const DEPTH = 50;
 
@@ -117,41 +123,43 @@ function createRoom(width: number, height: number): THREE.Group {
 //   return group;
 // }
 
-function createObjects(): THREE.Group {
+function createShapesObjects(unit: number): THREE.Group {
+  const s = (x: number) => x * unit;
+
   const group = new THREE.Group();
 
   const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.BoxGeometry(s(100), s(100), s(100)),
     new THREE.MeshStandardMaterial({
       color: 0x60a5fa,
       metalness: 0.1,
       roughness: 0.35,
     }),
   );
-  cube.position.set(0, 0, -1.5);
+  cube.position.set(0, 0, 0);
   group.add(cube);
 
   // Add random shapes
   const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.6, 32, 32),
+    new THREE.SphereGeometry(s(30), 64, 64),
     new THREE.MeshStandardMaterial({
       color: 0xf472b6,
       metalness: 0.3,
       roughness: 0.4,
     }),
   );
-  sphere.position.set(-2, -0.5, -2);
+  sphere.position.set(s(-130), s(-20), s(-20));
   group.add(sphere);
 
   const cone = new THREE.Mesh(
-    new THREE.ConeGeometry(0.5, 1.2, 32),
+    new THREE.ConeGeometry(s(50), s(86), 64),
     new THREE.MeshStandardMaterial({
       color: 0xa78bfa,
       metalness: 0.2,
       roughness: 0.3,
     }),
   );
-  cone.position.set(1.5, 0.3, -2.5);
+  cone.position.set(s(130), s(30), s(-30));
   cone.rotation.set(0.3, 0.8, -0.4);
   group.add(cone);
 
@@ -206,6 +214,63 @@ function createObjects(): THREE.Group {
   return group;
 }
 
+function createTargetsObjects(unit: number): THREE.Group {
+  const s = unitmul(unit);
+
+  const createTarget = (x: number, y: number, z: number) => {
+    const targetGroup = new THREE.Group();
+
+    // Create the target board (flat circle with concentric rings)
+    const targetRadius = s(40);
+    const numRings = 4;
+
+    // Create rings from outside to inside
+    for (let i = 0; i < numRings; i++) {
+      const ringRadius = targetRadius * (1 - i / numRings);
+      const ringGeometry = new THREE.CircleGeometry(ringRadius, 64);
+
+      // Alternate between red and white
+      const isRed = i % 2 === 0;
+      const ringMaterial = new THREE.MeshStandardMaterial({
+        color: isRed ? 0xff0000 : 0xffffff,
+        side: THREE.DoubleSide,
+        metalness: 0.1,
+        roughness: 0.8,
+      });
+
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.position.set(0, 0, 0.01 * i); // Slight offset to prevent z-fighting
+      targetGroup.add(ring);
+    }
+
+    // Add center bullseye
+    const bullseyeGeometry = new THREE.CircleGeometry(targetRadius * 0.15, 64);
+    const bullseyeMaterial = new THREE.MeshStandardMaterial({
+      color: 0xff0000,
+      side: THREE.DoubleSide,
+      metalness: 0.1,
+      roughness: 0.8,
+    });
+    const bullseye = new THREE.Mesh(bullseyeGeometry, bullseyeMaterial);
+    bullseye.position.set(0, 0, 0.5);
+    targetGroup.add(bullseye);
+
+    // Position the target group at x, y, z
+    targetGroup.position.set(x, y, z);
+
+    return targetGroup;
+  };
+
+  const group = new THREE.Group();
+
+  // Create multiple targets at different positions
+  group.add(createTarget(0, 0, s(-300)));
+  group.add(createTarget(s(-150), s(50), s(-400)));
+  group.add(createTarget(s(150), s(-50), s(-350)));
+
+  return group;
+}
+
 function createLighting(): THREE.Group {
   const group = new THREE.Group();
 
@@ -217,13 +282,22 @@ function createLighting(): THREE.Group {
   return group;
 }
 
-export function createScene(width: number, height: number): THREE.Scene {
+export function createScene(
+  name: "shapes" | "targets",
+  width: number,
+  height: number,
+): THREE.Scene {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
   // scene.fog = new THREE.Fog(0x000000, 10, 60);
 
   scene.add(createRoom(width, height));
-  scene.add(createObjects());
+  const unit = 30 / width;
+  if (name === "shapes") {
+    scene.add(createShapesObjects(unit));
+  } else if (name === "targets") {
+    scene.add(createTargetsObjects(unit));
+  }
   scene.add(createLighting());
 
   return scene;

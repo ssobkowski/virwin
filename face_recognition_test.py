@@ -1,5 +1,5 @@
 import asyncio
-import json
+import struct
 import threading
 import time
 
@@ -20,11 +20,17 @@ XY_COEFF = 1
 latest_coords = {"x": 0, "y": 0, "z": 0}
 
 
+def encode_coords() -> bytes:
+    return struct.pack(
+        "ddd", latest_coords["x"], latest_coords["y"], latest_coords["z"]
+    )
+
+
 async def websocket_handler(websocket):
     print("Client connected")
     try:
         while True:
-            await websocket.send(json.dumps(latest_coords))
+            await websocket.send(encode_coords())
             await asyncio.sleep(0.016)
     except websockets.ConnectionClosed:
         print("Client disconnected")

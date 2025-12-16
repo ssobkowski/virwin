@@ -39,9 +39,6 @@
       },
       "nursery": {
         "useMaxParams": "off"
-      },
-      "performance": {
-        "noNamespaceImport": "off"
       }
     }
   },
@@ -67,7 +64,7 @@
               ":BLANK_LINE:",
               ["@assets/**"],
               ":BLANK_LINE:",
-              ["**/*", "!@/**", "!./**/*"],
+              ["**/*", "!@/**", "!./**/*", "!../**/*"],
               ":BLANK_LINE:",
               "@/**",
               ":BLANK_LINE:",
