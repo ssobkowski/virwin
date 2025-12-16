@@ -2,7 +2,7 @@ import "./style.css";
 
 import * as THREE from "three/webgpu";
 
-import { createScene, type Scene } from "./scene";
+import { createTargetsScene } from "./scenes/targets";
 
 // Projection
 const WIDTH = 30;
@@ -12,12 +12,10 @@ const NEAR_PLANE = 0.1;
 const FAR_PLANE = 1000;
 
 // Mouse controls
-const ENABLE_MOUSE_MOVEMENT = false;
+const ENABLE_MOUSE_MOVEMENT = true;
 const MOUSE_MOVE_RANGE = 1;
-const SCROLL_SENSITIVITY = 0.005;
+const SCROLL_SENSITIVITY = 0.05;
 const MIN_HEAD_Z = 1;
-
-const SCENE_NAME: Scene = "targets";
 
 const XY_DEADZONE = 0.06; // Ignore tiny lateral jitters
 const XY_SMOOTH_MIN = 0.05; // Base smoothing when still
@@ -42,9 +40,12 @@ if (!root) {
 const renderer = new THREE.WebGPURenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 root.replaceChildren(renderer.domElement);
 
-const scene = createScene(SCENE_NAME, WIDTH, HEIGHT);
+// const scene = createScene(SCENE_NAME, WIDTH, HEIGHT);
+const scene = createTargetsScene(WIDTH, HEIGHT);
 
 const camera = new THREE.PerspectiveCamera(
   50,
@@ -135,8 +136,8 @@ const createWebSocketConnection = (url: string) => {
     ws.onmessage = null;
     ws.onopen = null;
     if (
-      ws.readyState === WebSocket.OPEN ||
-      ws.readyState === WebSocket.CONNECTING
+      ws.readyState === WebSocket.OPEN
+      || ws.readyState === WebSocket.CONNECTING
     ) {
       ws.close();
     }
@@ -204,8 +205,7 @@ const scheduleReconnect = (url: string) => {
 
   // Exponential backoff with jitter
   const delay = Math.min(
-    BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1) +
-      Math.random() * 1000,
+    BASE_RECONNECT_DELAY * 2 ** (reconnectAttempts - 1) + Math.random() * 1000,
     MAX_RECONNECT_DELAY,
   );
 
