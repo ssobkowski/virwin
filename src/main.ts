@@ -2,7 +2,8 @@ import "./style.css";
 
 import * as THREE from "three/webgpu";
 
-import { createTargetsScene } from "./scenes/targets";
+// import { createTargetsScene } from "./scenes/targets";
+import { createShapesScene } from "./scenes/shapes";
 
 // Projection
 const WIDTH = 30;
@@ -17,9 +18,10 @@ const MOUSE_MOVE_RANGE = 1;
 const SCROLL_SENSITIVITY = 0.05;
 const MIN_HEAD_Z = 1;
 
+const XY_SCALE = 1;
 const XY_DEADZONE = 0.06; // Ignore tiny lateral jitters
 const XY_SMOOTH_MIN = 0.05; // Base smoothing when still
-const XY_SMOOTH_MAX = 0.5; // Fast smoothing when moving
+const XY_SMOOTH_MAX = 0.15; // Fast smoothing when moving
 const XY_VELOCITY_SCALE = 12.0; // How "twitchy" the transition is
 
 // Z: Needs to be stable. High deadzone, slow smoothing.
@@ -44,8 +46,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 root.replaceChildren(renderer.domElement);
 
-// const scene = createScene(SCENE_NAME, WIDTH, HEIGHT);
-const scene = createTargetsScene(WIDTH, HEIGHT);
+const scene = createShapesScene(WIDTH, HEIGHT);
 
 const camera = new THREE.PerspectiveCamera(
   50,
@@ -136,8 +137,8 @@ const createWebSocketConnection = (url: string) => {
     ws.onmessage = null;
     ws.onopen = null;
     if (
-      ws.readyState === WebSocket.OPEN
-      || ws.readyState === WebSocket.CONNECTING
+      ws.readyState === WebSocket.OPEN ||
+      ws.readyState === WebSocket.CONNECTING
     ) {
       ws.close();
     }
@@ -163,8 +164,8 @@ const createWebSocketConnection = (url: string) => {
         const buffer = await event.data.arrayBuffer();
         const view = new Float64Array(buffer);
         const [x, y, z] = view;
-        targetHeadX = x;
-        targetHeadY = -y;
+        targetHeadX = x * XY_SCALE;
+        targetHeadY = -y * XY_SCALE;
         targetHeadZ = z;
       } catch (e) {
         console.error("Error parsing tracking data:", e);
